@@ -39,13 +39,13 @@ const insertOrderV1 = async (
       // Perform lock before getting orders for balance calculation
       if (opts.performLock) {
         await client.query(
-          `SELECT * FROM orders WHERE currency = $1 AND status = 'COMPLETED' FOR UPDATE;`,
+          `SELECT * FROM orders WHERE currency = $1 FOR UPDATE;`,
           [currency]
         );
       }
 
       const ordersResult = await client.query(
-        `SELECT id, amount, status FROM orders WHERE currency = $1 AND status = 'COMPLETED' FOR UPDATE;`,
+        `SELECT id, amount, status FROM orders WHERE currency = $1 FOR UPDATE;`,
         [currency]
       );
       console.info(
@@ -63,7 +63,7 @@ const insertOrderV1 = async (
         status = "FAILED";
       }
       const orderResult = await client.query(
-        "INSERT INTO orders (id, amount, currency, status, operation) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO NOTHING RETURNING *",
+        "INSERT INTO orders (id, amount, currency, status, operation) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO NOTHING RETURNING *;",
         [
           id,
           operation === "debit" ? -amount : amount,
@@ -96,7 +96,7 @@ const insertOrderV2 = async (
   return await withTransaction(pool, async (client) => {
     let status = "COMPLETED";
     const orderResult = await client.query(
-      "INSERT INTO orders (id, amount, currency, status, operation) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO NOTHING RETURNING *",
+      "INSERT INTO orders (id, amount, currency, status, operation) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id) DO NOTHING RETURNING *;",
       [
         id,
         operation === "debit" ? -amount : amount,
@@ -115,7 +115,7 @@ const insertOrderV2 = async (
     }
 
     const ordersResult = await client.query(
-      `SELECT id, amount, status FROM orders WHERE currency = $1;`,
+      `SELECT id, amount, status FROM orders WHERE currency = $1 FOR UPDATE;`,
       [currency]
     );
     console.info(
@@ -130,7 +130,7 @@ const insertOrderV2 = async (
 
     if (operation === "debit" && Number(balance ?? 0) < 0) {
       const updateResult = await client.query(
-        "UPDATE orders SET status = 'FAILED' WHERE id = $1 RETURNING *",
+        "UPDATE orders SET status = 'FAILED' WHERE id = $1 RETURNING *;",
         [id]
       );
       return updateResult.rows[0];
