@@ -1,0 +1,21 @@
+{
+  "name": "db",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "start": "tsx index.ts"
+  },
+  "dependencies": {
+    "pg": "^8.16.3"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/pg": "^8.15.6",
+    "dotenv": "^17.2.3",
+    "tsx": "^4.20.6"
+  }
+}
